@@ -10,6 +10,8 @@ def parse_args():
     parser.add_argument('--data_root', type=str, default='faces')
     parser.add_argument('--batch_size', type=int, default=256)
     parser.add_argument('--in_dim', type=int, default=100)
+    parser.add_argument('--num_classes', type=int, default=10)
+    parser.add_argument('--hidden_dim', type=int, default=64)
     parser.add_argument('--dim', type=int, default=64)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--weight_decay', type=float, default=1e-5)
@@ -19,7 +21,7 @@ def parse_args():
     parser.add_argument('--display_iters', type=int, default=20)
     parser.add_argument('--save_dir', type=str, default='checkpoints')
     parser.add_argument('--save_iters', type=int, default=100)
-    parser.add_argument('--test_checkpoint', type=str, default='checkpoints/generator_epoch_45_iter_500.pth')
+    parser.add_argument('--test_checkpoint', type=str, default='checkpoints/generator_epoch_16_iter_100.pth')
     return parser.parse_args()
 
 args = parse_args()

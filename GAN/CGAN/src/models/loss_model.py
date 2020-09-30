@@ -11,10 +11,10 @@ class LossModel(nn.Module):
         self.bce_loss = nn.BCELoss()
         self.lrelu = nn.LeakyReLU()
 
-    def forward(self, feats, classes):
+    def forward(self, feats, classes, labels):
         x = self.fc1(torch.cat((feats, classes), dim=1))
         x = self.lrelu(self.bn1(x))
         x = self.sigmoid(self.fc2(x))
-        loss = self.bce_loss(x)
+        loss = self.bce_loss(x, labels)
         return loss
 

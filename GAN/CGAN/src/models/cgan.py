@@ -54,41 +54,65 @@ class Generator(nn.Module):
         x = self.tanh(x)
         return x
 
-class Discriminator(nn.Module):
+class LossModel(nn.Module):
+    def __init__(self, feats_dim, num_classes, hidden_dim):#feats, classes, labels):
+        super(LossModel, self).__init__()
+        self.fc1 = nn.Linear(feats_dim + num_classes, hidden_dim, bias=False)
+        self.bn1 = nn.BatchNorm1d(hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, 1)
+        self.sigmoid = nn.Sigmoid()
+        self.bce_loss = nn.BCELoss()
+        self.lrelu = nn.LeakyReLU(0.2)
+
+    def forward(self, feats, classes, labels):
+        x = self.fc1(torch.cat((feats, classes), dim=1))
+        x = self.lrelu(self.bn1(x))
+        x = self.sigmoid(self.fc2(x))
+        loss = self.bce_loss(x, labels)
+        return loss
+
+class GenFeatsModel(nn.Module):
     def __init__(self, in_dim, dim=64):
-        super(Discriminator, self).__init__()
-        # self.conv_bn_relu1 = ConvBNLReLU(in_dim, dim)
+        super(GenFeatsModel, self).__init__()
         self.conv0 = nn.Conv2d(in_dim, dim, 5, 2, 2)
         self.lrelu = nn.LeakyReLU(0.2)
-        # self.lrelu = nn.ReLU()
-        self.conv_bn_relu2 = ConvBNLReLU(dim, 2*dim)
-        self.conv_bn_relu3 = ConvBNLReLU(2*dim, 4*dim)
-        self.conv_bn_relu4 = ConvBNLReLU(4*dim, 8*dim)
-        self.conv = nn.Conv2d(8*dim, 1, 4)
-        self.sigmoid = nn.Sigmoid()
-        self.apply(weight_init)
+        self.conv_bn_relu2 = ConvBNLReLU(dim, 2 * dim)
+        self.conv_bn_relu3 = ConvBNLReLU(2 * dim, 4 * dim)
+        self.conv_bn_relu4 = ConvBNLReLU(4 * dim, 8 * dim)
+        self.conv = nn.Conv2d(8 * dim, dim, 4)
+        self.bn = nn.BatchNorm2d(dim)
 
     def forward(self, inputs):
-        # x = self.conv_bn_relu1(inputs)
         x = self.conv0(inputs)
         x = self.lrelu(x)
         x = self.conv_bn_relu2(x)
         x = self.conv_bn_relu3(x)
         x = self.conv_bn_relu4(x)
-        x = self.conv(x)
-        x = self.sigmoid(x).view(-1)
-        return x
+        x = self.lrelu(self.bn(self.conv(x)))
+        return x.squeeze()
+
+
+class Discriminator(nn.Module):
+    def __init__(self, in_dim, num_classes, hidden_dim, dim=64):
+        super(Discriminator, self).__init__()
+        self.gen_feats_model = GenFeatsModel(in_dim, dim)
+        self.loss_model = LossModel(dim, num_classes, hidden_dim)
+
+    def forward(self, inputs, classes, labels):
+        x = self.gen_feats_model(inputs)
+        loss = self.loss_model(x, classes, labels)
+        return loss
 
 
 if __name__ == '__main__':
-    g = Generator(100, 64)
-    for m in g._modules:
-        print(m)
-    #inputs = torch.randn((2, 100))
-    #x = g(inputs)
-    #print(x.shape)
-
-    #d = Discriminator(3, 64)
-    #x = d(x)
-    #print(x.shape)
+    g = Generator()
+    z = torch.randn((10, 100))
+    c = torch.randint(0, 10, (10, 1))
+    c = torch.zeros((10, 10)).scatter_(1, c, 1)
+    x = g(z, c)
+    print(x.shape)
+    d = Discriminator(3, 10, 64, 64)
+    labels = torch.zeros((10,))
+    y = d(x, c, labels)
+    print(y)
 

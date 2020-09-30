@@ -1,0 +1,9 @@
+*.jpg
+*.zip
+*.png
+*.pth
+*.idea*
+*__pycache__*
+*.tensor
+*train_log*
+

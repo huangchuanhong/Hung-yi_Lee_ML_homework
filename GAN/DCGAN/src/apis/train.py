@@ -123,18 +123,17 @@ def test_old(args):
     print(g_outputs)
     cv2.imwrite('test.jpg', g_outputs)
 
-def test(args):
-    size = 10
+def test(args, inputs=None, size=10):
     generator = DCGANGenerator(args.in_dim, args.dim)
     state_dict = torch.load(args.test_checkpoint)
     for n, p in generator.state_dict().items():
         p.data.copy_(state_dict[n])
     generator = generator.to(args.device)
     generator.eval()
-    inputs = torch.randn((size*size, 100)).view(-1, 100).to(args.device)
+    if inputs is None:
+        inputs = torch.randn((size*size, 100)).view(-1, 100).to(args.device)
     outputs = generator(inputs)
- 
-    size = 10
+
     fig, ax = plt.subplots(size, size, figsize=(size, size))
     for i in range(size):
         for j in range(size):

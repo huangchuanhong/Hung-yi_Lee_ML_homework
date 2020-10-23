@@ -1,7 +1,7 @@
 import argparse
 import sys
 sys.path.insert(0, '.')
-from src.apis import stage1_train, stage2_train, stage1_test
+from src.apis import stage1_train, stage2_train, stage1_test, stage2_test
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('--s2_checkpoint_path', type=str, default=None)
     parser.add_argument('--s2_checkpoint_dir', type=str, default='output/checkpoints/s2')
     parser.add_argument('--s1_test_checkpoint_path', type=str, default='output/checkpoints/s1/generator_epoch_380.pth')
-    parser.add_argument('--s2_test_checkpoint_path', type=str, default='output/checkpoints/s2/generator_epoch_580.pth')
+    parser.add_argument('--s2_test_checkpoint_path', type=str, default='output/checkpoints/s2/generator_epoch_280.pth')
     parser.add_argument('--s1_log_path', type=str, default='output/train_log_s1')
     parser.add_argument('--s2_log_path', type=str, default='output/train_log_s2')
     parser.add_argument('--txt_embedding_dim', type=int, default=1024)
@@ -44,10 +44,13 @@ def main(args):
     else:
         if args.stage == 1:
             stage1_test(args)
+        elif args.stage == 2:
+            stage2_test(args)
 
 
 
 
 if __name__ == '__main__':
+    print('main')
     args = parse_args()
     main(args)

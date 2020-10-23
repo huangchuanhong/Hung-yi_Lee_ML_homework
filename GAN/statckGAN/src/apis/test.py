@@ -34,13 +34,16 @@ def stage1_test(args):
             r_img.save(f'output/test_imgs/s1/test_r_{idx}.jpg')
 
 def stage2_test(args):
-    print('here')
     dataset = Birds(args.data_dir, 'test', im_size=256)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
     generator1 = Stage1Generator(args.txt_embedding_dim, args.c_dim, args.z_dim, args.gf_dim)
-    generator1.load_state_dict(args.s1_test_checkpoint_path)
+    state_dict = torch.load(args.s1_test_checkpoint_path)
+    for n, p in generator1.state_dict().items():
+        p.copy_(state_dict['module.' + n])
     generator2 = Stage2Generator(args.txt_embedding_dim, args.c_dim, args.gf_dim)
-    generator2.load_stage_dict(args.s2_test_checkpoint_path)
+    state_dict = torch.load(args.s2_test_checkpoint_path)
+    for n, p in generator2.state_dict().items():
+        p.copy_(state_dict['module.' + n])
     generator1 = generator1.cuda()
     generator2 = generator2.cuda()
     generator1.eval()

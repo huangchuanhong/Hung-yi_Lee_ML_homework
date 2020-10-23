@@ -167,6 +167,8 @@ def stage2_train(args):
                 summary_writer.add_scalar('f_loss', f_loss.item())
                 summary_writer.add_scalar('g_loss', g_loss.item())
                 summary_writer.add_scalar('kl_loss', kl_loss.item())
+            elif idx % args.display_iters == 0 and idx > 0:
+                logger.info(f'epoch:{epoch}, lr={cur_lr}, d_loss={d_loss}, r_loss={r_loss}, w_loss={w_loss}, f_loss={f_loss}, g_loss={g_loss}, kl_loss={kl_loss_}')
         if epoch % args.lr_decay_every_epoch == 0 and epoch > 0:
             logger.info(f'lr decay: {cur_lr}')
             cur_lr *= args.lr_decay_ratio
